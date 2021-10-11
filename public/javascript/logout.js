@@ -7,6 +7,7 @@ async function logout() {
 
   if (response.ok) {
     console.log('success');
+    location.reload();
   } else {
     alert(response.statusText);
   }

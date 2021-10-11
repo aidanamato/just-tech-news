@@ -81,20 +81,19 @@ router.post('/', ({body}, res) => {
     });
 });
 
-router.put('/upvote', ({body}, res) => {
-  Post.upvote(body, {Vote})
+router.put('/upvote', ({session, body}, res) => {
+  if (session) {
+    Post.upvote({...body, user_id: session.user_id}, {Vote})
     .then(dbPostData => res.json(dbPostData))
     .catch(err => {
-      res.status(400).json(err)}
-    );
+      console.log(err);
+      res.status(500).json(err);
+    });
+  }
 });
 
 router.put('/:id', (req, res) => {
-  Post.update(
-    {
-      title: req.body.title,
-    },
-    {
+  Post.update(req.body, {
       where: {
         id: req.params.id
       }

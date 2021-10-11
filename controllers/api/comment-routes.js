@@ -7,14 +7,19 @@ router.get('/', (req, res) => {
     .catch(err => res.status(500).json(err));
 });
 
-router.post('/', ({body}, res) => {
-  Comment.create({
-    comment_text: body.comment_text,
-    user_id: body.user_id,
-    post_id: body.post_id
-  })
-    .then(dbCommentData => res.json(dbCommentData))
-    .catch(err => res.status(400).json(err));
+router.post('/', ({session, body}, res) => {
+  if (session) {
+    Comment.create({
+      comment_text: body.comment_text,
+      post_id: body.post_id,
+      user_id: session.user_id
+    })
+      .then(dbCommentData => res.json(dbCommentData))
+      .catch(err => {
+        console.log(err);
+        res.status(400).json(err);
+      });
+  }
 });
 
 router.delete('/:id', ({params}, res) => {
