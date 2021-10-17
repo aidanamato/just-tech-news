@@ -13,7 +13,7 @@ async function loginFormHandler(event) {
     
     if (response.ok) {
       console.log('success');
-      location.replace('/');
+      location.replace('/dashboard');
     } else {
       alert(response.statusText);
     }
