@@ -64,13 +64,21 @@ router.get('/:id', (req, res) => {
 });
 
 // POST /api/users
-router.post('/', ({body}, res) => {
+router.post('/', ({session, body}, res) => {
   User.create({
     username: body.username,
     email: body.email,
     password: body.password
   })
-    .then(dbUserData => res.json(dbUserData))
+    .then(dbUserData => {
+      session.save(() => {
+        session.user_id = dbUserData.id;
+        session.username = dbUserData.username;
+        session.loggedIn = true;
+
+        res.json(dbUserData);
+      });
+    })
     .catch(err => {
       console.log(err);
       res.status(500).json(err);
@@ -78,7 +86,7 @@ router.post('/', ({body}, res) => {
 });
 
 //POST /api/users/login
-router.post('/login', ({body}, res) => {
+router.post('/login', ({session, body}, res) => {
   User.findOne({
     where: {
       email: body.email
@@ -95,8 +103,22 @@ router.post('/login', ({body}, res) => {
       return;
     }
 
-    res.json({user: dbUserData, message: 'You are now logged in!'});
+    session.save(() => {
+      session.user_id = dbUserData.id;
+      session.username = dbUserData.username;
+      session.loggedIn = true;
+
+      res.json({user: dbUserData, message: 'You are now logged in!'});
+    });
   });
+});
+
+router.post('/logout', ({session}, res) => {
+  if (session.loggedIn) {
+    session.destroy(() => res.status(204).end());
+  } else {
+    res.status(404).end();
+  }
 });
 
 // PUT /api/users/:id
